@@ -1,4 +1,5 @@
 #include <vector>
+#include <dlfcn.h>
 
 #include "SDLGLGraphicsContext.h"
 
@@ -14,6 +15,22 @@
 
 #if defined(USING_EGL)
 #include "EGL/egl.h"
+void *handle = dlopen("libIMGegl.so", RTLD_LAZY);
+auto IMGeglGetDisplay = (decltype(&::eglGetDisplay))dlsym(handle, "IMGeglGetDisplay");
+auto IMGeglInitialize = (decltype(&::eglInitialize))dlsym(handle, "IMGeglInitialize");
+auto IMGeglTerminate = (decltype(&::eglTerminate))dlsym(handle, "IMGeglTerminate");
+auto IMGeglGetConfigs = (decltype(&::eglGetConfigs))dlsym(handle, "IMGeglGetConfigs");
+auto IMGeglGetConfigAttrib = (decltype(&::eglGetConfigAttrib))dlsym(handle, "IMGeglGetConfigAttrib");
+
+auto IMGeglCreateContext = (decltype(&::eglCreateContext))dlsym(handle, "IMGeglCreateContext");
+auto IMGeglDestroyContext = (decltype(&::eglDestroyContext))dlsym(handle, "IMGeglDestroyContext");
+auto IMGeglCreateWindowSurface = (decltype(&::eglCreateWindowSurface))dlsym(handle, "IMGeglCreateWindowSurface");
+
+auto IMGeglDestroySurface = (decltype(&::eglDestroySurface))dlsym(handle, "IMGeglDestroySurface");
+auto IMGeglMakeCurrent = (decltype(&::eglMakeCurrent))dlsym(handle, "IMGeglMakeCurrent");
+auto IMGeglSwapBuffers = (decltype(&::eglSwapBuffers))dlsym(handle, "IMGeglSwapBuffers");
+auto IMGeglQueryString = (decltype(&::eglQueryString))dlsym(handle, "IMGeglQueryString");
+auto IMGeglGetError = (decltype(&::eglGetError))dlsym(handle, "IMGeglGetError");
 #endif
 
 class GLRenderManager;
@@ -32,7 +49,7 @@ static bool useEGLSwap = false;
 int CheckEGLErrors(const char *file, int line) {
 	EGLenum error;
 	const char *errortext = "unknown";
-	error = eglGetError();
+	error = IMGeglGetError();
 	switch (error)
 	{
 		case EGL_SUCCESS: case 0:           return 0;
@@ -62,13 +79,13 @@ int CheckEGLErrors(const char *file, int line) {
 	}
 
 static bool EGL_OpenInit() {
-	if ((g_eglDisplay = eglGetDisplay(g_Display)) == EGL_NO_DISPLAY) {
+	if ((g_eglDisplay = IMGeglGetDisplay(g_Display)) == EGL_NO_DISPLAY) {
 		EGL_ERROR("Unable to create EGL display.", true);
 		return false;
 	}
-	if (eglInitialize(g_eglDisplay, NULL, NULL) != EGL_TRUE) {
+	if (IMGeglInitialize(g_eglDisplay, NULL, NULL) != EGL_TRUE) {
 		EGL_ERROR("Unable to initialize EGL display.", true);
-		eglTerminate(g_eglDisplay);
+		IMGeglTerminate(g_eglDisplay);
 		g_eglDisplay = EGL_NO_DISPLAY;
 		return false;
 	}
@@ -147,20 +164,20 @@ EGLConfig EGL_FindConfig(int *contextVersion) {
 	std::vector<EGLConfig> configs;
 	EGLint numConfigs = 0;
 
-	EGLBoolean result = eglGetConfigs(g_eglDisplay, nullptr, 0, &numConfigs);
+	EGLBoolean result = IMGeglGetConfigs(g_eglDisplay, nullptr, 0, &numConfigs);
 	if (result != EGL_TRUE || numConfigs == 0) {
 		return nullptr;
 	}
 
 	configs.resize(numConfigs);
-	result = eglGetConfigs(g_eglDisplay, &configs[0], numConfigs, &numConfigs);
+	result = IMGeglGetConfigs(g_eglDisplay, &configs[0], numConfigs, &numConfigs);
 	if (result != EGL_TRUE || numConfigs == 0) {
 		return nullptr;
 	}
 
 	// Mali (ARM) seems to have compositing issues with alpha backbuffers.
 	// EGL_TRANSPARENT_TYPE doesn't help.
-	const char *vendorName = eglQueryString(g_eglDisplay, EGL_VENDOR);
+	const char *vendorName = IMGeglQueryString(g_eglDisplay, EGL_VENDOR);
 	const bool avoidAlphaGLES = vendorName && !strcmp(vendorName, "ARM");
 
 	EGLConfig best = nullptr;
@@ -169,7 +186,7 @@ EGLConfig EGL_FindConfig(int *contextVersion) {
 	for (const EGLConfig &config : configs) {
 		auto readConfig = [&](EGLint attr) -> EGLint {
 			EGLint val = 0;
-			eglGetConfigAttrib(g_eglDisplay, config, attr, &val);
+			IMGeglGetConfigAttrib(g_eglDisplay, config, attr, &val);
 			return val;
 		};
 
@@ -253,19 +270,23 @@ int8_t EGL_Init(SDL_Window *window) {
 		contextAttributes[0] = EGL_NONE;
 	}
 
-	g_eglContext = eglCreateContext(g_eglDisplay, eglConfig, nullptr, contextAttributes);
+	g_eglContext = IMGeglCreateContext(g_eglDisplay, eglConfig, nullptr, contextAttributes);
 	if (g_eglContext == EGL_NO_CONTEXT) {
 		EGL_ERROR("Unable to create GLES context!", true);
 		return 1;
 	}
 
-	g_eglSurface = eglCreateWindowSurface(g_eglDisplay, eglConfig, g_Window, nullptr);
+	g_eglSurface = IMGeglCreateWindowSurface(g_eglDisplay, eglConfig, g_Window, nullptr);
 	if (g_eglSurface == EGL_NO_SURFACE) {
-		EGL_ERROR("Unable to create EGL surface!", true);
-		return 1;
+
+			g_eglSurface = (IMGeglCreateWindowSurface(g_eglDisplay, eglConfig, NULL, nullptr));
+			if (g_eglSurface == EGL_NO_SURFACE) {
+					EGL_ERROR("Unable to create EGL surface!", true);
+					return 1;
+			}
 	}
 
-	if (eglMakeCurrent(g_eglDisplay, g_eglSurface, g_eglSurface, g_eglContext) != EGL_TRUE) {
+	if (IMGeglMakeCurrent(g_eglDisplay, g_eglSurface, g_eglSurface, g_eglContext) != EGL_TRUE) {
 		EGL_ERROR("Unable to make GLES context current.", true);
 		return 1;
 	}
@@ -275,14 +296,14 @@ int8_t EGL_Init(SDL_Window *window) {
 
 void EGL_Close() {
 	if (g_eglDisplay != EGL_NO_DISPLAY) {
-		eglMakeCurrent(g_eglDisplay, NULL, NULL, EGL_NO_CONTEXT);
+		IMGeglMakeCurrent(g_eglDisplay, NULL, NULL, EGL_NO_CONTEXT);
 		if (g_eglContext != NULL) {
-			eglDestroyContext(g_eglDisplay, g_eglContext);
+			IMGeglDestroyContext(g_eglDisplay, g_eglContext);
 		}
 		if (g_eglSurface != NULL) {
-			eglDestroySurface(g_eglDisplay, g_eglSurface);
+			IMGeglDestroySurface(g_eglDisplay, g_eglSurface);
 		}
-		eglTerminate(g_eglDisplay);
+		IMGeglTerminate(g_eglDisplay);
 		g_eglDisplay = EGL_NO_DISPLAY;
 	}
 	if (g_Display != nullptr) {
@@ -431,7 +452,7 @@ int SDLGLGraphicsContext::Init(SDL_Window *&window, int x, int y, int w, int h, 
 	renderManager_->SetSwapFunction([&]() {
 #ifdef USING_EGL
 		if (useEGLSwap)
-			eglSwapBuffers(g_eglDisplay, g_eglSurface);
+			IMGeglSwapBuffers(g_eglDisplay, g_eglSurface);
 		else
 			SDL_GL_SwapWindow(window_);
 #else

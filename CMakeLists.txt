@@ -302,6 +302,7 @@ if(USING_EGL)
 endif()
 
 if(NOT LIBRETRO AND NOT IOS AND NOT MACOSX)
+
 	find_package(SDL2)
 	find_package(SDL2_ttf)
 	find_package(Fontconfig)

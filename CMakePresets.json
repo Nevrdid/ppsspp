@@ -1,23 +1,133 @@
 {
-    "version": 2,
-    "configurePresets": [
-        {
-            "name": "gcc-debug",
-            "binaryDir": "build-gcc-debug",
-            "generator": "Ninja",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
-            }
-        },
-        {
-            "name": "clang-debug",
-            "binaryDir": "build-clang-debug",
-            "generator": "Ninja",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
-            }
-        }
-    ]
+  "version": 4,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 19,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "gcc-debug",
+      "binaryDir": "build-gcc-debug",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "clang-debug",
+      "binaryDir": "build-clang-debug",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "aarch64-release",
+      "displayName": "AArch64 Release Build with LTO",
+      "toolchainFile": "./toolchain.cmake",
+      "generator": "Ninja",
+      "binaryDir": "build-aarch64-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_C_FLAGS": "-Ofast -flto",
+        "CMAKE_CXX_FLAGS": "-Ofast -flto",
+        "CMAKE_EXE_LINKER_FLAGS": "-flto",
+        "ARM": "ON",
+        "ARMIPS": "ON",
+        "ENABLE_HLSL": "ON",
+        "ENABLE_OPT": "ON",
+        "ENABLE_PCH": "ON",
+        "ENABLE_SPVREMAPPER": "OFF",
+        "HEADLESS": "OFF",
+        "LIBRETRO": "OFF",
+        "LOONGARCH64": "OFF",
+        "MIPS": "OFF",
+        "MOBILDE_DEVICE": "OFF",
+        "NO_GETADDRINFO": "OFF",
+        "RISCV64": "OFF",
+        "SIMULATOR": "OFF",
+        "SKIP_GLSLANG_INSTALL": "ON",
+        "SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS": "ON",
+        "UPNC_BUILD_STATIC": "ON",
+        "USE_ARMIPS": "ON",
+        "USE_ASAN": "OFF",
+        "USE_CCACHE": "ON",
+        "USE_DISCORD": "OFF",
+        "USE_FFMPEG": "ON",
+        "USE_LIBNX": "OFF",
+        "USE_MINIUPNC": "ON",
+        "USE_NO_MMAP": "OFF",
+        "USE_SYSTEM_FFMPEG": "OFF",
+        "USE_SYSTEM_LIBPNG": "ON",
+        "USE_SYSTEM_LIBSDL2": "ON",
+        "USE_SYSTEM_LIBZIP": "OFF",
+        "USE_SYSTEM_MINIUPNC": "OFF",
+        "USE_SYSTEM_SNAPPY": "OFF",
+        "USE_SYSTEM_ZSTD": "OFF",
+        "USE_UBSAN": "OFF",
+        "USE_VULKAN_DISPLAY_KHR": "ON",
+        "USE_WAYLAND_WSI": "OFF",
+        "USING_EGL": "ON",
+        "USING_FBDEV": "ON",
+        "USING_GLES2": "ON",
+        "USING_QT_UI": "OFF",
+        "USING_X11_VULKAN": "OFF"
+      }
+    },
+    {
+      "name": "aarch64-debug",
+      "displayName": "AArch64 Debug Build",
+      "toolchainFile": "./toolchain.cmake",
+      "generator": "Ninja",
+      "binaryDir": "build-aarch64-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "ARM": "ON",
+        "ARMIPS": "ON",
+        "ENABLE_HLSL": "ON",
+        "ENABLE_OPT": "ON",
+        "ENABLE_PCH": "ON",
+        "ENABLE_SPVREMAPPER": "OFF",
+        "HEADLESS": "OFF",
+        "LIBRETRO": "OFF",
+        "LOONGARCH64": "OFF",
+        "MIPS": "OFF",
+        "MOBILDE_DEVICE": "OFF",
+        "NO_GETADDRINFO": "OFF",
+        "RISCV64": "OFF",
+        "SIMULATOR": "OFF",
+        "SKIP_GLSLANG_INSTALL": "ON",
+        "SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS": "ON",
+        "UPNC_BUILD_STATIC": "ON",
+        "USE_ARMIPS": "ON",
+        "USE_ASAN": "OFF",
+        "USE_CCACHE": "ON",
+        "USE_DISCORD": "OFF",
+        "USE_FFMPEG": "ON",
+        "USE_LIBNX": "OFF",
+        "USE_MINIUPNC": "ON",
+        "USE_NO_MMAP": "OFF",
+        "USE_SYSTEM_FFMPEG": "OFF",
+        "USE_SYSTEM_LIBPNG": "ON",
+        "USE_SYSTEM_LIBSDL2": "ON",
+        "USE_SYSTEM_LIBZIP": "OFF",
+        "USE_SYSTEM_MINIUPNC": "OFF",
+        "USE_SYSTEM_SNAPPY": "OFF",
+        "USE_SYSTEM_ZSTD": "OFF",
+        "USE_UBSAN": "OFF",
+        "USE_VULKAN_DISPLAY_KHR": "ON",
+        "USE_WAYLAND_WSI": "OFF",
+        "USING_EGL": "ON",
+        "USING_FBDEV": "ON",
+        "USING_GLES2": "ON",
+        "USING_QT_UI": "OFF",
+        "USING_X11_VULKAN": "OFF"
+      }
+    }
+  ]
 }

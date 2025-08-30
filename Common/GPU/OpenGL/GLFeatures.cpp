@@ -316,23 +316,23 @@ bool CheckGLExtensions() {
 	}
 
 	const char *extString = nullptr;
-	if (gl_extensions.ver[0] >= 3) {
-		// Let's use the new way for OpenGL 3.x+, required in the core profile.
-		GLint numExtensions = 0;
-		glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
-		g_all_gl_extensions.clear();
-		g_set_gl_extensions.clear();
-		for (GLint i = 0; i < numExtensions; ++i) {
-			const char *ext = (const char *)glGetStringi(GL_EXTENSIONS, i);
-			g_set_gl_extensions.insert(ext);
-			g_all_gl_extensions += ext;
-			g_all_gl_extensions += " ";
-		}
-	} else {
+	// if (gl_extensions.ver[0] >= 3) {
+	// 	// Let's use the new way for OpenGL 3.x+, required in the core profile.
+	// 	GLint numExtensions = 0;
+	// 	glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+	// 	g_all_gl_extensions.clear();
+	// 	g_set_gl_extensions.clear();
+	// 	for (GLint i = 0; i < numExtensions; ++i) {
+	// 		const char *ext = (const char *)glGetStringi(GL_EXTENSIONS, i);
+	// 		g_set_gl_extensions.insert(ext);
+	// 		g_all_gl_extensions += ext;
+	// 		g_all_gl_extensions += " ";
+	// 	}
+	// } else {
 		extString = (const char *)glGetString(GL_EXTENSIONS);
 		g_all_gl_extensions = extString ? extString : "";
 		ParseExtensionsString(g_all_gl_extensions, g_set_gl_extensions);
-	}
+	// }
 
 #if defined(WIN32) && !defined(__LIBRETRO__)
 	const char *wglString = 0;
